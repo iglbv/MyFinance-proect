@@ -28,8 +28,8 @@ const Transactions: React.FC<TransactionProps> = ({ transactions, onAddTransacti
                 </thead>
                 <tbody>
                     {transactions.map((transaction) => (
-                        <tr key={transaction.date.toISOString()}>
-                            <td>{transaction.date.toLocaleDateString()}</td>
+                        <tr key={new Date(transaction.date).toISOString()}>
+                            <td>{new Date(transaction.date).toLocaleDateString()}</td>
                             <td>{transaction.description}</td>
                             <td>{transaction.amount} ₽</td>
                             <td>{transaction.category}</td>

@@ -5,6 +5,7 @@ import Transactions from './pages/Transactions';
 import Reports from './pages/Reports';
 import './index.css';
 import { Transaction } from './data/types';
+import axios from 'axios';
 
 const App: React.FC = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -13,10 +14,33 @@ const App: React.FC = () => {
   useEffect(() => {
     const storedBalance = localStorage.getItem('initialBalance');
     setInitialBalance(parseFloat(storedBalance || '0'));
+
+    const fetchTransactions = async () => {
+      try {
+        const response = await axios.get('http://localhost:3001/transactions');
+        setTransactions(response.data);
+      } catch (error) {
+        console.error('Error fetching transactions:', error);
+      }
+    };
+    fetchTransactions();
   }, []);
 
-  const addTransaction = (newTransaction: Transaction) => {
-    setTransactions([...transactions, newTransaction]);
+  const addTransaction = async (newTransaction: Transaction) => {
+    try {
+      await axios.post('http://localhost:3001/transactions', newTransaction);
+      const fetchTransactions = async () => {
+        try {
+          const response = await axios.get('http://localhost:3001/transactions');
+          setTransactions(response.data);
+        } catch (error) {
+          console.error('Error fetching transactions:', error);
+        }
+      };
+      fetchTransactions();
+    } catch (error) {
+      console.error('Error adding transaction:', error);
+    }
   };
 
   const handleInitialBalanceChange = (event: React.ChangeEvent<HTMLInputElement>) => {
