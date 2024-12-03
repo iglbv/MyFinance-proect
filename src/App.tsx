@@ -13,7 +13,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const storedBalance = localStorage.getItem('initialBalance');
-    setInitialBalance(parseFloat(storedBalance || '0'));
+    setInitialBalance(Number(storedBalance) || 0);
 
     const fetchTransactions = async () => {
       try {
@@ -29,24 +29,34 @@ const App: React.FC = () => {
   const addTransaction = async (newTransaction: Transaction) => {
     try {
       await axios.post('http://localhost:3001/transactions', newTransaction);
-      const fetchTransactions = async () => {
-        try {
-          const response = await axios.get('http://localhost:3001/transactions');
-          setTransactions(response.data);
-        } catch (error) {
-          console.error('Error fetching transactions:', error);
-        }
-      };
-      fetchTransactions();
+      const updatedTransactions = await axios.get('http://localhost:3001/transactions');
+      setTransactions(updatedTransactions.data);
     } catch (error) {
       console.error('Error adding transaction:', error);
     }
   };
 
+  const deleteTransaction = async (id: number) => {
+    try {
+      await axios.delete(`http://localhost:3001/transactions/${id}`);
+      const updatedTransactions = await axios.get('http://localhost:3001/transactions');
+      setTransactions(updatedTransactions.data);
+    } catch (error) {
+      console.error('Error deleting transaction:', error);
+    }
+  };
+
   const handleInitialBalanceChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const newBalance = parseInt(event.target.value, 10) || 0;
-    setInitialBalance(newBalance);
-    localStorage.setItem('initialBalance', newBalance.toString());
+    const newBalance = parseFloat(event.target.value);
+    if (!isNaN(newBalance)) {
+      setInitialBalance(newBalance);
+      localStorage.setItem('initialBalance', newBalance.toString());
+    } else if (event.target.value === "") {
+      setInitialBalance(0);
+      localStorage.setItem('initialBalance', '0');
+    } else {
+      alert("Некорректный ввод. Введите число.");
+    }
   };
 
   return (
@@ -64,11 +74,16 @@ const App: React.FC = () => {
         </header>
         <div>
           <label htmlFor="initialBalance">Начальный баланс:</label>
-          <input type="number" id="initialBalance" value={initialBalance} onChange={handleInitialBalanceChange} />
+          <input
+            type="number"
+            id="initialBalance"
+            value={initialBalance}
+            onChange={handleInitialBalanceChange}
+          />
         </div>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/transactions" element={<Transactions transactions={transactions} onAddTransaction={addTransaction} />} />
+          <Route path="/transactions" element={<Transactions transactions={transactions} onAddTransaction={addTransaction} onDeleteTransaction={deleteTransaction} />} />
           <Route path="/reports" element={<Reports transactions={transactions} initialBalance={initialBalance} />} />
         </Routes>
       </div>

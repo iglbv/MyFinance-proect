@@ -1,6 +1,7 @@
 import React from 'react';
 import { Transaction } from '../data/types';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import { calculateTotals } from '../utils/calculations';
 
 interface ReportsProps {
     transactions: Transaction[];
@@ -8,9 +9,8 @@ interface ReportsProps {
 }
 
 const Reports: React.FC<ReportsProps> = ({ transactions, initialBalance }) => {
-    const totalIncome = transactions.reduce((sum, transaction) => transaction.type === 'доход' ? sum + transaction.amount : sum, 0);
-    const totalExpenses = transactions.reduce((sum, transaction) => transaction.type === 'расход' ? sum + transaction.amount : sum, 0);
-    const balance = initialBalance + totalIncome - totalExpenses;
+    const total = calculateTotals(transactions);
+    const balance = initialBalance + total.income - total.expenses;
 
     const incomeByCategory = transactions
         .filter(t => t.type === 'доход')
@@ -25,7 +25,6 @@ const Reports: React.FC<ReportsProps> = ({ transactions, initialBalance }) => {
             acc[curr.category] = (acc[curr.category] || 0) + curr.amount;
             return acc;
         }, {} as { [key: string]: number });
-
 
     const transactionsByMonth = transactions.reduce((acc, curr) => {
         const month = curr.date.toLocaleString('ru', { month: 'long', year: 'numeric' });
@@ -54,35 +53,41 @@ const Reports: React.FC<ReportsProps> = ({ transactions, initialBalance }) => {
             <h2>Общий баланс: {balance.toFixed(2)} ₽</h2>
 
             <h2>Доходы по категориям:</h2>
-            <BarChart width={500} height={300} data={dataIncome}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="amount" fill="#8884d8" label="сумма" />
-            </BarChart>
+            {dataIncome.length > 0 && (
+                <BarChart width={500} height={300} data={dataIncome}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="amount" fill="#8884d8" label="сумма" />
+                </BarChart>
+            )}
 
             <h2>Расходы по категориям:</h2>
-            <BarChart width={500} height={300} data={dataExpenses}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="amount" fill="#82ca9d" label="сумма" />
-            </BarChart>
+            {dataExpenses.length > 0 && (
+                <BarChart width={500} height={300} data={dataExpenses}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="amount" fill="#82ca9d" label="сумма" />
+                </BarChart>
+            )}
 
             <h2>Транзакции по месяцам:</h2>
-            <BarChart width={500} height={300} data={dataMonthly}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="income" fill="#8884d8" label="доходы" />
-                <Bar dataKey="expenses" fill="#82ca9d" label="расходы" />
-            </BarChart>
+            {dataMonthly.length > 0 && (
+                <BarChart width={500} height={300} data={dataMonthly}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="income" fill="#8884d8" label="доходы" />
+                    <Bar dataKey="expenses" fill="#82ca9d" label="расходы" />
+                </BarChart>
+            )}
         </div>
     );
 };
