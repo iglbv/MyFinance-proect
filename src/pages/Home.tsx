@@ -4,6 +4,7 @@ const Home: React.FC = () => {
     return (
         <div className="home-page">
             <h1>Добро пожаловать в приложение для учёта финансов!</h1>
+            <img src="src\assets\finance.png" alt="Finance App Image" className="hero-image" />
             <p>
                 Здесь вы можете отслеживать свои доходы и расходы, анализировать свои
                 финансовые данные и планировать свой бюджет.

@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import axios from 'axios';
 import Home from './pages/Home';
 import Transactions from './pages/Transactions';
 import Reports from './pages/Reports';
+import NotFound from './pages/NotFound';
 import './index.css';
 import { Transaction } from './data/types';
-import axios from 'axios';
+import Footer from './components/Footer';
 
 const App: React.FC = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -85,7 +87,9 @@ const App: React.FC = () => {
           <Route path="/" element={<Home />} />
           <Route path="/transactions" element={<Transactions transactions={transactions} onAddTransaction={addTransaction} onDeleteTransaction={deleteTransaction} />} />
           <Route path="/reports" element={<Reports transactions={transactions} initialBalance={initialBalance} />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
+        <Footer />
       </div>
     </Router>
   );
